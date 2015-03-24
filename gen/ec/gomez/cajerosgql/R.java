@@ -203,25 +203,31 @@ containing a value of this type.
         public static final int common_signin_btn_text_pressed_light=0x7f020017;
         public static final int ic_drawer=0x7f020018;
         public static final int ic_launcher=0x7f020019;
-        public static final int ic_plusone_medium_off_client=0x7f02001a;
-        public static final int ic_plusone_small_off_client=0x7f02001b;
-        public static final int ic_plusone_standard_off_client=0x7f02001c;
-        public static final int ic_plusone_tall_off_client=0x7f02001d;
+        public static final int ic_marker1=0x7f02001a;
+        public static final int ic_plusone_medium_off_client=0x7f02001b;
+        public static final int ic_plusone_small_off_client=0x7f02001c;
+        public static final int ic_plusone_standard_off_client=0x7f02001d;
+        public static final int ic_plusone_tall_off_client=0x7f02001e;
+        public static final int icon=0x7f02001f;
+        public static final int splash_screen=0x7f020020;
+        public static final int stub=0x7f020021;
     }
     public static final class id {
-        public static final int LblBanco=0x7f05000a;
-        public static final int LblNombre=0x7f05000b;
+        public static final int LblBanco=0x7f05000b;
+        public static final int LblNombre=0x7f05000c;
         public static final int LstOpciones=0x7f050007;
-        public static final int action_settings=0x7f050011;
+        public static final int action_settings=0x7f050013;
         public static final int btn_consultar=0x7f050006;
-        public static final int button1=0x7f050010;
-        public static final int drawer=0x7f05000e;
-        public static final int drawer_layout=0x7f05000c;
-        public static final int frame_container=0x7f05000d;
+        public static final int drawer=0x7f05000f;
+        public static final int drawer_layout=0x7f05000d;
+        public static final int frame_container=0x7f05000e;
         public static final int hybrid=0x7f050004;
-        public static final int map=0x7f05000f;
+        public static final int imageView1=0x7f05000a;
+        public static final int img_marker=0x7f050011;
+        public static final int map=0x7f050010;
         public static final int none=0x7f050000;
         public static final int normal=0x7f050001;
+        public static final int progressBar1=0x7f050012;
         public static final int satellite=0x7f050002;
         public static final int tab1=0x7f050005;
         public static final int tab2=0x7f050008;
@@ -235,14 +241,15 @@ containing a value of this type.
         public static final int activity_main=0x7f030000;
         public static final int lista_maincajeros=0x7f030001;
         public static final int navigation_drawer=0x7f030002;
-        public static final int view_mapa=0x7f030003;
+        public static final int splash_screen=0x7f030003;
+        public static final int view_mapa=0x7f030004;
     }
     public static final class menu {
         public static final int main=0x7f0a0000;
     }
     public static final class string {
-        public static final int action_settings=0x7f06001b;
-        public static final int app_name=0x7f06001a;
+        public static final int action_settings=0x7f06001a;
+        public static final int app_name=0x7f06001b;
         /**   Title for notification shown when GooglePlayServices needs to be
         enabled for a application to work. [CHAR LIMIT=70] 
          */
@@ -338,6 +345,10 @@ containing a value of this type.
          */
         public static final int common_signin_button_text_long=0x7f060013;
         public static final int hello_world=0x7f06001c;
+        public static final int img_descripcion=0x7f06001d;
+        public static final int server_url=0x7f06001e;
+        public static final int service_bancos=0x7f06001f;
+        public static final int service_cajeros=0x7f060020;
     }
     public static final class style {
         /** 

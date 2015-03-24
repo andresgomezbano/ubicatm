@@ -11,6 +11,7 @@ import org.json.JSONObject;
 
 import ec.gomez.cajerosgql.control.*;
 import ec.gomez.cajerosgql.external.*;
+import ec.gomez.cajerosgql.models.Cajero;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.app.Activity;
@@ -69,17 +70,22 @@ public class Main extends Activity {
 	        {
         		String latitud = String.valueOf(gpsTracker.getLatitude());
         		String longitud = String.valueOf(gpsTracker.getLongitude());
-        		Log.i("latitud",latitud);
-        		Log.i("longitud",longitud);
+        		Log.i("info",latitud);
+        		Log.i("info",longitud);
         		
         		new RetrieveFeedTask(latitud,longitud).execute();
 	        }
+        	else
+        	{
+        		Log.i("info","no se pudo");
+        		new RetrieveFeedTask("0","0").execute();
+        	}
         }
       };
       
   	class RetrieveFeedTask extends AsyncTask {
 
-	    private CajeroManager[] cajeros = null;
+	    private Cajero[] cajeros = null;
 	    private String latitud;
 	    private String longitud;
 	    
@@ -98,26 +104,28 @@ public class Main extends Activity {
 			try
 			{
 					JSONObject dato = new JSONObject();
-					Log.i("latitud",this.latitud);
-					Log.i("longitud",this.longitud);
 					dato.put("latitud", String.valueOf(this.latitud));
 					dato.put("longitud", String.valueOf(this.longitud));
+					dato.put("bancos", "");
 						
 					StringEntity entity = new StringEntity(dato.toString());
 					post.setEntity(entity);
 					
 				    HttpResponse resp = httpClient.execute(post);
 				    String respStr = EntityUtils.toString(resp.getEntity());
-				        
 				    JSONArray respJSON = new JSONArray(respStr);
-				    cajeros = new CajeroManager[respJSON.length()];
+				    
+				    cajeros = new Cajero[respJSON.length()];
 				        //JSONObject obj = new JSONObject(respStr);
-				       
-				        
 				    for(int i=0; i<respJSON.length(); i++)
 				    {
+				    	Log.i("info","aca");
 				       	JSONObject obj = respJSON.getJSONObject(i);
-				       	CajeroManager cajero = new CajeroManager(obj.getString("nombreBanco"), obj.getString("nombre"));
+				       	Cajero cajero = new Cajero();
+				       	cajero.setIdBanco(obj.getInt("idBanco"));
+				       	cajero.setNombreBanco(obj.getString("nombreBanco"));
+				       	cajero.setNombre(obj.getString("nombre"));
+				       	cajero.setDireccion(obj.getString("direccion"));
 				        cajeros[i] = cajero;
 				    }
 			        
@@ -133,6 +141,7 @@ public class Main extends Activity {
 		
 		@Override
 		protected void onPostExecute(Object result) {
+			 Log.i("info","aca");
 		    super.onPostExecute(result);
 		    CajeroAdaptador adaptador = new CajeroAdaptador(Main.this,cajeros);
 	        lstOpciones.setAdapter(adaptador);

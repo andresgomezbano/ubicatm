@@ -13,6 +13,9 @@ import org.json.JSONObject;
 
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 
+import ec.gomez.cajerosgql.R;
+import android.content.Context;
+import android.content.res.Resources;
 import android.util.Log;
 
 
@@ -95,10 +98,13 @@ public class Cajero {
 		return this.direccion;
 	}
 	
-	public static ArrayList<Cajero> obtenerCercanos(String latitud,String longitud)
+	public static ArrayList<Cajero> obtenerCercanos(Context context, String latitud,String longitud, ArrayList<Integer> bancosElegidos)
 	{
 		HttpClient httpClient = new DefaultHttpClient();
-		HttpPost post = new HttpPost("http://www.segurocanguro.com/cajeros/services/cajero/cercanos/");
+		Resources res = context.getResources();
+		String url = res.getString(R.string.server_url) + res.getString(R.string.service_cajeros);
+		HttpPost post = new HttpPost(url);
+		//HttpPost post = new HttpPost("http://192.168.0.21/cajeros/services/cajero/cercanos/");
 		post.setHeader("content-type", "application/json");
 		ArrayList<Cajero> cajeros = null;
 		try
@@ -106,13 +112,13 @@ public class Cajero {
 			JSONObject dato = new JSONObject();
 			dato.put("latitud", String.valueOf(latitud));
 			dato.put("longitud", String.valueOf(longitud));
-				
+			String bancos = bancosElegidos.toString();
+			dato.put("bancos",bancos.substring(1,bancos.length()-1));
 			StringEntity entity = new StringEntity(dato.toString());
 			post.setEntity(entity);
 			
 			HttpResponse resp = httpClient.execute(post);
 			String respStr = EntityUtils.toString(resp.getEntity());
-			    
 			JSONArray respJSON = new JSONArray(respStr);
 			cajeros = new ArrayList<Cajero>();
 			//JSONObject obj = new JSONObject(respStr);

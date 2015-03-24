@@ -1,9 +1,16 @@
 package ec.gomez.cajerosgql;
 
+import java.util.ArrayList;
+
+import ec.gomez.cajerosgql.models.Banco;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.res.Configuration;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.widget.DrawerLayout;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -19,26 +26,34 @@ public class BaseActivity extends android.support.v4.app.FragmentActivity{
 	String[] opciones = null;
 	DrawerLayout drawerLayout = null;
 	ActionBarDrawerToggle toggle = null;
-	protected FrameLayout actContent = null;
-	protected DrawerLayout mDrawerLayout = null;
-	
+	//protected FrameLayout actContent = null;
+	//protected DrawerLayout mDrawerLayout = null;
+	protected ArrayList<Banco> bancos = null;
+	protected ArrayList<Integer> bancosElegidos = null;
+	AlertDialog dialogoBancos = null;
+		
     @Override
     public void setContentView(final int layoutResID) {
-    	mDrawerLayout= (DrawerLayout) getLayoutInflater().inflate(R.layout.navigation_drawer, null); // Your base layout here
-        actContent= (FrameLayout) mDrawerLayout.findViewById(R.id.frame_container);
+    	DrawerLayout mDrawerLayout= (DrawerLayout) getLayoutInflater().inflate(R.layout.navigation_drawer, null); // Your base layout here
+    	FrameLayout actContent= (FrameLayout) mDrawerLayout.findViewById(R.id.frame_container);
         getLayoutInflater().inflate(layoutResID, actContent, true);
         super.setContentView(mDrawerLayout);
         // here you can get your drawer buttons and define how they should behave and what must they do, so you won't be needing to repeat it in every activity class
+        bancosElegidos = new ArrayList<Integer>();
+        bancosElegidos.add(-1);
+        new ThreadBanco().execute();
+        
         
         ListView drawer = (ListView) findViewById(R.id.drawer);
-		drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
 		
-		opciones = new String[]{"Opción 1", "Opción 2", "Opción 3"};
+		opciones = new String[]{"Bancos", "Redes", "Opción 3"};
 		drawer.setAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, android.R.id.text1, opciones));
 		
 		drawer.setOnItemClickListener(new OnItemClickListener() {
 			@Override
 			public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
+	            dialogoBancos.show();
 				Toast.makeText(BaseActivity.this, "Pulsado: " + opciones[arg2], Toast.LENGTH_SHORT).show();
 				drawerLayout.closeDrawers();
 			}
@@ -60,14 +75,12 @@ public class BaseActivity extends android.support.v4.app.FragmentActivity{
         getActionBar().setHomeButtonEnabled(true);
     }
 	
-	//@Override
-   // protected void onCreate(Bundle savedInstanceState) {
-		//super.onCreate(savedInstanceState);
-        //setContentView(R.layout.navigation_drawer);
-		
-
-	//}
-
+    public void aceptarBancos()
+    {
+    	
+    }
+    
+    
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -99,5 +112,70 @@ public class BaseActivity extends android.support.v4.app.FragmentActivity{
         return super.onOptionsItemSelected(item);
     }
 
-
+     class ThreadBanco extends AsyncTask<Object, Object, Object>{
+    	    	
+    	@Override
+    	protected Object doInBackground(Object... params) {
+    		bancos = Banco.obtenerListado(BaseActivity.this);
+    		return null;
+    	}
+    	
+    	@Override
+    	protected void onPostExecute(Object result)
+    	{
+        	final CharSequence[] items = new CharSequence[bancos.size() + 1];
+    		final boolean[] marcados = new boolean[bancos.size() + 1];
+    		int i = 1;
+    		items[0] = "Todos";
+    		marcados[0] = true;
+    		for(Banco banco: bancos)
+    		{
+    			//bancosElegidos.add(banco.getId());
+    			items[i] = banco.getNombre();
+    			marcados[i] = true;
+    			i++;
+    		}
+    		
+    		AlertDialog.Builder builder = new AlertDialog.Builder(BaseActivity.this);
+    		builder.setTitle("Seleccionar Bancos");
+    		builder.setMultiChoiceItems(items, marcados,new DialogInterface.OnMultiChoiceClickListener() {
+    		     @Override
+    		     public void onClick(DialogInterface dialog, int indexSelected,boolean isChecked) {
+    		    	 if(indexSelected == 0)
+    		    	 {
+    		    		 bancosElegidos.clear();
+    		    		 if(isChecked)bancosElegidos.add(-1);
+    		    		 ListView list = ((AlertDialog) dialog).getListView();
+    		    		 for(int i = 1; i < items.length; i++)
+    		    		 {
+    		    			 list.setItemChecked(i, isChecked);
+    		    			 marcados[i] = isChecked;
+    		    			 //if(isChecked)bancosElegidos.add(bancos.get(i).getId());
+    		    		 }
+    		    		 /*if(!isChecked)bancosElegidos.clear();
+    		    		 Log.i("data",bancosElegidos.toString());*/
+    		    	 }
+    		    	 else
+    		    	 {
+    		    		 if (isChecked) 
+    		    		 {
+    		    			 bancosElegidos.add(bancos.get(indexSelected -1).getId());
+    		    		 } else if (bancosElegidos.contains(bancos.get(indexSelected-1).getId())) 
+    		    		 {
+    		    			 bancosElegidos.remove(Integer.valueOf(bancos.get(indexSelected-1).getId()));
+    		    		 }
+    		    	 }
+    		     }
+    		 })
+    		 .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+    		 @Override
+    		 public void onClick(DialogInterface dialog, int id) {
+    			 	Log.i("data",bancosElegidos.toString());
+    		     	aceptarBancos();
+    		     }
+    		 })
+    		 .setNegativeButton("Cancel",null);
+    		 dialogoBancos = builder.create();
+    	}
+    }
 }
