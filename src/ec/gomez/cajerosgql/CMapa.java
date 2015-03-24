@@ -14,9 +14,9 @@ import ec.gomez.cajerosgql.external.GPSTracker;
 import ec.gomez.cajerosgql.models.Cajero;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.ProgressBar;
 
 public class CMapa extends BaseActivity {
@@ -24,6 +24,7 @@ public class CMapa extends BaseActivity {
 	GoogleMap mapa = null;
 	private Button btn_consultar;
 	private ProgressBar progressBar;
+	LatLng puntoInicial;
 	//private ImageView img_marker;
 	//LatLng ultimoPunto;
 	
@@ -37,13 +38,17 @@ public class CMapa extends BaseActivity {
     	progressBar = (ProgressBar) findViewById(R.id.progressBar1);
     	
     	mapa = ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map)).getMap();
-    	
+    	puntoInicial = new LatLng(-2.18833, -79.8926);
+    	mapa.moveCamera(CameraUpdateFactory.newLatLngZoom(puntoInicial,14.0f));
     	GPSTracker gpsTracker = new GPSTracker(this);
     	if (gpsTracker.canGetLocation())
         {
-    		String latitud = String.valueOf(gpsTracker.getLatitude());
-    		String longitud = String.valueOf(gpsTracker.getLongitude());    		
-    		new RetrieveFeedTask(latitud,longitud,true,true).execute();
+    		double latitud = gpsTracker.getLatitude();
+    		double longitud = gpsTracker.getLongitude();
+    		Log.i("info",String.valueOf(latitud));
+    		Log.i("info",String.valueOf(longitud));
+    		if(latitud != 0 && longitud != 0)this.puntoInicial = new LatLng(latitud, longitud);
+    		new RetrieveFeedTask(this.puntoInicial,true,true).execute();
         }
     }
     
@@ -59,10 +64,8 @@ public class CMapa extends BaseActivity {
     
     View.OnClickListener handler_consultarCajeros = new View.OnClickListener() {
         public void onClick(View v) {
-        	LatLng puntoCentro = mapa.getCameraPosition().target;
-        	String latitud = String.valueOf(puntoCentro.latitude);
-    		String longitud = String.valueOf(puntoCentro.longitude);    		
-    		new RetrieveFeedTask(latitud,longitud,false,false).execute();
+        	LatLng puntoCentro = mapa.getCameraPosition().target;    		
+    		new RetrieveFeedTask(puntoCentro,false,false).execute();
 			
         }
       };
@@ -72,14 +75,14 @@ public class CMapa extends BaseActivity {
     	  /*String latitud = String.valueOf(ultimoPunto.latitude);
     	  String longitud = String.valueOf(ultimoPunto.longitude);*/
     	LatLng puntoCentro = mapa.getCameraPosition().target;
-      	String latitud = String.valueOf(puntoCentro.latitude);
-      	String longitud = String.valueOf(puntoCentro.longitude);
-      	new RetrieveFeedTask(latitud,longitud,false,false).execute();
+      	//String latitud = String.valueOf(puntoCentro.latitude);
+      	//String longitud = String.valueOf(puntoCentro.longitude);
+      	//puntoInicial = new LatLng(latitud, longitud);
+      	new RetrieveFeedTask(puntoCentro,false,false).execute();
       }
       
 	class RetrieveFeedTask extends AsyncTask<Object, Object, Object> {
-	    private String latitud;
-	    private String longitud;
+	    private LatLng puntoCentral;
 	    private Boolean cambiarZoom;
 	    private ArrayList<Cajero> cajeros = null;
 	    private ProgressBar progressBar;
@@ -102,10 +105,9 @@ public class CMapa extends BaseActivity {
 	    	this.cambiarPosicion = true;
 	    }*/
 	    
-	    public RetrieveFeedTask(String latitud, String longitud, Boolean cambiarZoom, Boolean cambiarPosicion)
+	    public RetrieveFeedTask(LatLng puntoCentral, Boolean cambiarZoom, Boolean cambiarPosicion)
 	    {
-	    	this.latitud = latitud;
-	    	this.longitud = longitud;
+	    	this.puntoCentral = puntoCentral;
 	    	this.cambiarZoom = cambiarZoom;
 	    	this.cambiarPosicion = cambiarPosicion;
 	    	CMapa.this.mostrarBarra();
@@ -114,7 +116,7 @@ public class CMapa extends BaseActivity {
 		@Override
 		protected Object doInBackground(Object... params) {
 			//this.progressBar.setVisibility(View.VISIBLE);
-			this.cajeros = Cajero.obtenerCercanos(CMapa.this, latitud, longitud, bancosElegidos);
+			this.cajeros = Cajero.obtenerCercanos(CMapa.this, puntoCentral, bancosElegidos);
 			return null;
 		}
 		
@@ -123,12 +125,12 @@ public class CMapa extends BaseActivity {
 		    super.onPostExecute(result);
 		    mapa.clear();
 		    
-		    LatLng puntoCentro = new LatLng(Double.parseDouble(this.latitud),Double.parseDouble(this.longitud));
+		    //LatLng puntoCentro = new LatLng(Double.parseDouble(this.latitud),Double.parseDouble(this.longitud));
 		    //CMapa.this.ultimoPunto = puntoCentro;
 		    
 		    if(this.cambiarPosicion)
 		    {
-			    CameraUpdate camUpd1 = CameraUpdateFactory.newLatLng(puntoCentro);
+			    CameraUpdate camUpd1 = CameraUpdateFactory.newLatLng(this.puntoCentral);
 			    mapa.moveCamera(camUpd1);
 			    /*mapa.addMarker(new MarkerOptions()
 			    				.position(puntoCentro)
@@ -144,7 +146,7 @@ public class CMapa extends BaseActivity {
 		    }
 		    if (this.cambiarZoom)
 		    {
-		    	mapa.animateCamera(CameraUpdateFactory.newLatLngZoom(puntoCentro,17), 2000, null);
+		    	mapa.animateCamera(CameraUpdateFactory.newLatLngZoom(this.puntoCentral,17), 2000, null);
 		    	
 		    }
 		    CMapa.this.ocultarBarra();

@@ -7,6 +7,7 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
+import com.google.android.gms.maps.model.LatLng;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -98,7 +99,7 @@ public class Cajero {
 		return this.direccion;
 	}
 	
-	public static ArrayList<Cajero> obtenerCercanos(Context context, String latitud,String longitud, ArrayList<Integer> bancosElegidos)
+	public static ArrayList<Cajero> obtenerCercanos(Context context, LatLng puntoCentral, ArrayList<Integer> bancosElegidos)
 	{
 		HttpClient httpClient = new DefaultHttpClient();
 		Resources res = context.getResources();
@@ -110,8 +111,8 @@ public class Cajero {
 		try
 		{
 			JSONObject dato = new JSONObject();
-			dato.put("latitud", String.valueOf(latitud));
-			dato.put("longitud", String.valueOf(longitud));
+			dato.put("latitud", String.valueOf(puntoCentral.latitude));
+			dato.put("longitud", String.valueOf(puntoCentral.longitude));
 			String bancos = bancosElegidos.toString();
 			dato.put("bancos",bancos.substring(1,bancos.length()-1));
 			StringEntity entity = new StringEntity(dato.toString());
